@@ -1,0 +1,39 @@
+Could detect when a button has been pressed, or a GPIO input has changed, by simply checking repeatedly in a loop; for example:
+
+while True:
+    if GPIO.input(18) == False:
+        # put the code to be actioned here
+    time.sleep(0.1)
+
+The disadvantage here is that not much else can be done while checking for button presses.
+A second disadvantage is that if the button press is quick, it could come and go before it can be registered with the GPIO.input.
+This approach is called polling.
+Interrupts work differently. They allow you to associate a function with one of the pins so that when the voltage
+at the input changes either from low to high or vice versa, you can trigger the function to be run.
+First, define a function called my_callback that takes a single argument. This argument specifies the input
+that triggered the interrupt, allowing you to use the same handler function for a number of interrupts.
+
+def my_callback(channel):
+    print('You pressed the button')
+
+In this case, the callback function just displays a message.
+The line of code that does the actual linking is:
+
+GPIO.add_event_detect(18, GPIO.FALLING, callback=my_callback)
+
+The first parameter specifies the pin (18). The second can be GPIO.FALLING or GPIO.RISING. If this is set to FALLING,
+the function will only be called if the GPIO pin goes from high to low. This is the case in this example,
+as the switch pulls the input low against the internal pull-up resistor. If, on the other hand, the second argument
+is set to RISING, the function will only be called when the input goes from low to high (when the switch is released).
+
+The event handler function does not stop the main counting loop while it runs; it actually runs in its own separate thread
+of execution. Switches often bounce when pressed. This means they don’t always transition cleanly from open to closed,
+but bounce between the two, possibly several times, making it appear that the button was pressed multiple times,
+when actually it was pressed only once. If you keep pressing the button, you’ll probably see this reflected in the output
+as the message appearing more than once for one button press.
+
+The library actually has an option to stop bounce from being a problem, by preventing the interrupt from being triggered
+again within a certain amount of time. To make use of this feature, just add the extra optional parameter bouncetime
+to the add_event_detect call. The value ofbouncetime is in milliseconds.
+
+GPIO.add_event_detect(18, GPIO.FALLING, callback=my_callback, bouncetime=100)

@@ -1,13 +1,11 @@
+from time import sleep
 import RPi.GPIO as GPIO
-import time
+GPIO.setmode(GPIO.BOARD)
 
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(18,GPIO.OUT)
+GPIO.setup(16,GPIO.OUT)
 
 while (True):
-    print "LED on"
-    GPIO.output(18,True)
-    time.sleep(1)
-    print "LED off"
-    GPIO.output(18,False)
-    time.sleep (1)
+        GPIO.output(16,True)
+        sleep(0.5)
+        GPIO.output(16, False)
+        sleep(0.5)
